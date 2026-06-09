@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS Reseller Research Dashboard — Shift4 / SkyTab</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #FDFCF7; color: #1A1A1A; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 32px 24px 60px; }
+  header { margin-bottom: 28px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .brand-mark { width: 32px; height: 32px; border-radius: 8px; background: #0F6E56; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; }
+  .brand-name { font-size: 14px; color: #5A5A5A; }
+  h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.4px; line-height: 1.2; margin-bottom: 8px; color: #0A0A0A; }
+  .lede { font-size: 15px; color: #5A5A5A; line-height: 1.5; max-width: 640px; }
+
+  .input-card { background: #fff; border: 0.5px solid #E5E2D8; border-radius: 14px; padding: 22px; margin: 26px 0 22px; }
+  .form-row { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
+  .input-group { flex: 1; min-width: 220px; }
+  label { display: block; font-size: 12px; font-weight: 500; color: #444; margin-bottom: 6px; letter-spacing: 0.3px; }
+  input, select { width: 100%; padding: 11px 14px; font-size: 15px; border: 1px solid #DDD7C7; border-radius: 8px; background: #fff; font-family: inherit; color: #1A1A1A; transition: border-color 0.15s; }
+  input:focus, select:focus { outline: none; border-color: #0F6E56; box-shadow: 0 0 0 3px rgba(15, 110, 86, 0.12); }
+  .country-row { margin-top: 12px; }
+  .country-row select { max-width: 200px; }
+  button.run { padding: 11px 22px; font-size: 14px; font-weight: 500; background: #0F6E56; color: #fff; border: none; border-radius: 8px; cursor: pointer; transition: background 0.15s, transform 0.05s; align-self: flex-end; min-height: 44px; }
+  button.run:hover { background: #0B5644; }
+  button.run:active { transform: scale(0.98); }
+
+  .results { margin-top: 8px; }
+  .results-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .results-title { font-size: 17px; font-weight: 600; }
+  .results-sub { font-size: 13px; color: #6A6A6A; }
+
+  .section { margin-bottom: 22px; }
+  .section-title { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; color: #0F6E56; text-transform: uppercase; margin-bottom: 10px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+
+  .link-card { background: #fff; border: 0.5px solid #E5E2D8; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.15s, transform 0.05s; text-decoration: none; color: inherit; }
+  .link-card:hover { border-color: #0F6E56; transform: translateY(-1px); }
+  .link-card .lc-head { display: flex; align-items: center; gap: 10px; }
+  .link-card .lc-icon { width: 28px; height: 28px; border-radius: 6px; background: #F4F2EC; color: #0F6E56; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+  .link-card .lc-name { font-size: 14px; font-weight: 600; }
+  .link-card .lc-desc { font-size: 12px; color: #6A6A6A; line-height: 1.4; }
+  .link-card .lc-arrow { font-size: 13px; color: #0F6E56; margin-left: auto; }
+
+  .copy-row { background: #F4F2EC; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-family: ui-monospace, "SF Mono", Menlo, monospace; color: #2A2A2A; margin-top: 6px; word-break: break-all; }
+  .copy-row .text { flex: 1; }
+  .copy-btn { background: #fff; border: 0.5px solid #DDD7C7; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: 500; color: #444; flex-shrink: 0; }
+  .copy-btn:hover { background: #FDFCF7; }
+  .copy-btn.copied { background: #E1F5EE; color: #0F6E56; border-color: #0F6E56; }
+
+  .tips { background: #FAF6E7; border: 0.5px solid #E8DDB8; border-radius: 12px; padding: 16px 18px; font-size: 13px; line-height: 1.55; color: #5A4A1A; }
+  .tips strong { color: #3A2F0E; font-weight: 600; }
+  .tips ul { margin: 8px 0 0 18px; }
+  .tips li { margin-bottom: 4px; }
+
+  .legal { margin-top: 28px; font-size: 11px; color: #999; line-height: 1.5; text-align: center; }
+
+  .empty { padding: 30px 20px; text-align: center; color: #888; font-size: 14px; background: #fff; border: 0.5px dashed #DDD; border-radius: 12px; }
+
+  @media (max-width: 540px) {
+    h1 { font-size: 22px; }
+    .wrap { padding: 20px 16px 40px; }
+    .input-card { padding: 16px; }
+    button.run { width: 100%; align-self: stretch; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <span class="brand-name">Cactus · Reseller Research Tool</span>
+    </div>
+    <h1>Find Shift4 &amp; SkyTab POS resellers</h1>
+    <p class="lede">Enter a city to generate ready-to-click research queries across Google, Maps, LinkedIn, and Shift4's site. Built for sales prospecting — opens the right tabs so you can evaluate resellers manually.</p>
+  </header>
+
+  <div class="input-card">
+    <div class="form-row">
+      <div class="input-group">
+        <label for="city">City</label>
+        <input id="city" type="text" placeholder="e.g. Austin, Boston, Toronto" autocomplete="off">
+      </div>
+      <div class="input-group">
+        <label for="state">State / Province</label>
+        <input id="state" type="text" placeholder="e.g. TX, MA, ON" autocomplete="off">
+      </div>
+    </div>
+    <div class="form-row country-row" style="margin-top: 14px;">
+      <div class="input-group" style="flex: 0 1 200px;">
+        <label for="country">Country</label>
+        <select id="country">
+          <option value="US">United States</option>
+          <option value="CA">Canada</option>
+        </select>
+      </div>
+      <div style="flex: 1;"></div>
+      <button class="run" id="runBtn">Generate searches</button>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="empty">Enter a city above to generate research links.</div>
+  </div>
+
+  <p class="legal">
+    This tool generates search URLs only — no scraping, no data collection. Always verify reseller info on official sources before outreach. Respect CAN-SPAM (US) and CASL (Canada) when contacting businesses.
+  </p>
+
+</div>
+
+<script>
+(function() {
+  const cityEl = document.getElementById('city');
+  const stateEl = document.getElementById('state');
+  const countryEl = document.getElementById('country');
+  const runBtn = document.getElementById('runBtn');
+  const results = document.getElementById('results');
+
+  function encode(s) { return encodeURIComponent(s); }
+
+  function buildSearches(city, state, country) {
+    const loc = [city, state].filter(Boolean).join(', ');
+    const locFull = country === 'CA' ? loc + ', Canada' : loc + ', USA';
+
+    return {
+      discovery: [
+        {
+          name: 'Google: Shift4 resellers',
+          desc: 'General web search for Shift4 partners in this area',
+          url: 'https://www.google.com/search?q=' + encode('"Shift4" OR "SkyTab" POS reseller ' + locFull),
+          icon: 'G'
+        },
+        {
+          name: 'Google: SkyTab dealer',
+          desc: 'Find dealers selling SkyTab specifically',
+          url: 'https://www.google.com/search?q=' + encode('"SkyTab POS" dealer OR reseller OR partner ' + locFull),
+          icon: 'G'
+        },
+        {
+          name: 'Google Maps: POS systems',
+          desc: 'Local business listings with addresses & phone',
+          url: 'https://www.google.com/maps/search/' + encode('POS systems restaurant ' + locFull),
+          icon: 'M'
+        },
+        {
+          name: 'Google Maps: Shift4 partner',
+          desc: 'Local resellers listed on Maps',
+          url: 'https://www.google.com/maps/search/' + encode('Shift4 SkyTab reseller ' + locFull),
+          icon: 'M'
+        },
+        {
+          name: 'Shift4: Become a merchant',
+          desc: 'Submit your location to be referred to a local partner',
+          url: 'https://www.shift4.com/skytab',
+          icon: 'S4'
+        },
+        {
+          name: 'Reddit: ask for recommendations',
+          desc: 'See what restaurant owners locally recommend',
+          url: 'https://www.google.com/search?q=' + encode('site:reddit.com Shift4 OR SkyTab POS ' + locFull),
+          icon: 'R'
+        }
+      ],
+      people: [
+        {
+          name: 'LinkedIn: Shift4 reseller owners',
+          desc: 'Find owners/founders of local POS resellers',
+          url: 'https://www.linkedin.com/search/results/people/?keywords=' + encode('Shift4 SkyTab reseller owner ' + city) + '&origin=GLOBAL_SEARCH_HEADER',
+          icon: 'in'
+        },
+        {
+          name: 'LinkedIn: POS dealers',
+          desc: 'Broader search for POS dealer principals',
+          url: 'https://www.linkedin.com/search/results/people/?keywords=' + encode('POS dealer owner ' + city) + '&origin=GLOBAL_SEARCH_HEADER',
+          icon: 'in'
+        },
+        {
+          name: 'LinkedIn: Shift4 companies',
+          desc: 'Find reseller companies (not people)',
+          url: 'https://www.linkedin.com/search/results/companies/?keywords=' + encode('Shift4 reseller ' + city),
+          icon: 'in'
+        },
+        {
+          name: 'Google: owner names',
+          desc: 'Find named owners of local POS companies',
+          url: 'https://www.google.com/search?q=' + encode('"founder" OR "owner" OR "CEO" POS reseller ' + locFull),
+          icon: 'G'
+        }
+      ],
+      contact: [
+        {
+          name: 'Google: emails on websites',
+          desc: 'Look for general contact info on reseller sites',
+          url: 'https://www.google.com/search?q=' + encode('"@" "contact us" Shift4 SkyTab reseller ' + locFull),
+          icon: 'G'
+        },
+        {
+          name: 'BBB: accredited businesses',
+          desc: 'Better Business Bureau listings (US)',
+          url: 'https://www.bbb.org/search?find_country=' + (country === 'CA' ? 'CAN' : 'USA') + '&find_text=' + encode('POS systems') + '&find_loc=' + encode(loc),
+          icon: 'BB'
+        },
+        {
+          name: 'Yelp: local POS providers',
+          desc: 'Business listings often include contact info',
+          url: 'https://www.yelp.com/search?find_desc=' + encode('POS systems') + '&find_loc=' + encode(loc),
+          icon: 'Y'
+        }
+      ]
+    };
+  }
+
+  function makeCard(item) {
+    return '<a class="link-card" href="' + item.url + '" target="_blank" rel="noopener">' +
+      '<div class="lc-head">' +
+        '<div class="lc-icon">' + item.icon + '</div>' +
+        '<div class="lc-name">' + item.name + '</div>' +
+        '<div class="lc-arrow">→</div>' +
+      '</div>' +
+      '<div class="lc-desc">' + item.desc + '</div>' +
+    '</a>';
+  }
+
+  function makeOutreachTemplates(city, state) {
+    const loc = [city, state].filter(Boolean).join(', ');
+    const emailSubject = 'Quick partnership idea for your ' + (city || 'local') + ' restaurant clients';
+    const emailBody = 'Hi [Name],\n\nI saw your firm runs Shift4/SkyTab installations in the ' + loc + ' area. We built Cactus, an invoice processing and food cost tool that pairs cleanly on top of SkyTab — it auto-scans supplier invoices, flags pricing anomalies in real time, and surfaces food cost in one view. Starts at $49/location/mo.\n\nA recent customer caught a $440 overcharge on a single line item the day the invoice arrived. That kind of catch is the easiest "value add" you can stack onto your existing POS deployments.\n\nOpen to a 15-min call to explore a referral or co-sell motion? Happy to share the deck first.\n\nBest,\n[Your name]\nCactus';
+
+    return { emailSubject, emailBody };
+  }
+
+  function escapeHTML(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function makeCopyRow(label, text, id) {
+    return '<div style="margin-top:10px;">' +
+      '<label style="font-size:11px;color:#777;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;display:block;">' + label + '</label>' +
+      '<div class="copy-row">' +
+        '<div class="text" id="' + id + '-text">' + escapeHTML(text).replace(/\n/g, '<br>') + '</div>' +
+        '<button class="copy-btn" data-copy-id="' + id + '" data-raw="' + escapeHTML(text) + '">Copy</button>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function render(city, state, country) {
+    const searches = buildSearches(city, state, country);
+    const tmpl = makeOutreachTemplates(city, state);
+    const loc = [city, state].filter(Boolean).join(', ');
+
+    let html = '';
+
+    html += '<div class="results-head">';
+    html += '  <div class="results-title">Resellers near ' + (loc || 'your area') + '</div>';
+    html += '  <div class="results-sub">' + (country === 'CA' ? 'Canada' : 'USA') + '</div>';
+    html += '</div>';
+
+    html += '<div class="section">';
+    html += '  <div class="section-title">Step 1 — Find the companies</div>';
+    html += '  <div class="grid">' + searches.discovery.map(makeCard).join('') + '</div>';
+    html += '</div>';
+
+    html += '<div class="section">';
+    html += '  <div class="section-title">Step 2 — Find the owners</div>';
+    html += '  <div class="grid">' + searches.people.map(makeCard).join('') + '</div>';
+    html += '</div>';
+
+    html += '<div class="section">';
+    html += '  <div class="section-title">Step 3 — Find contact info</div>';
+    html += '  <div class="grid">' + searches.contact.map(makeCard).join('') + '</div>';
+    html += '</div>';
+
+    html += '<div class="section">';
+    html += '  <div class="section-title">Outreach templates (copy & customize)</div>';
+    html += '  <div class="tips" style="background:#fff;border-color:#E5E2D8;color:#1A1A1A;">';
+    html += makeCopyRow('Email subject', tmpl.emailSubject, 'subj');
+    html += makeCopyRow('Email body', tmpl.emailBody, 'body');
+    html += '  </div>';
+    html += '</div>';
+
+    html += '<div class="tips">';
+    html += '  <strong>How to use this:</strong>';
+    html += '  <ul>';
+    html += '    <li>Start with <strong>Step 1</strong> to build a list of reseller companies in ' + (city || 'your area') + '.</li>';
+    html += '    <li>Use <strong>Step 2</strong> (LinkedIn) to identify the owner or principal of each company.</li>';
+    html += '    <li>Use <strong>Step 3</strong> only for general business contact info (info@, sales@). For personal emails, send a LinkedIn connection request first — it converts 3-5× better and stays on the right side of CAN-SPAM / CASL.</li>';
+    html += '    <li>Track everything in a spreadsheet: company, owner, LinkedIn URL, status. Don\'t scrape into a database.</li>';
+    html += '  </ul>';
+    html += '</div>';
+
+    results.innerHTML = html;
+    wireCopyButtons();
+  }
+
+  function wireCopyButtons() {
+    document.querySelectorAll('.copy-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const raw = btn.getAttribute('data-raw');
+        const text = raw.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 1500);
+        });
+      });
+    });
+  }
+
+  function run() {
+    const city = cityEl.value.trim();
+    const state = stateEl.value.trim();
+    const country = countryEl.value;
+    if (!city) {
+      cityEl.focus();
+      cityEl.style.borderColor = '#D85A30';
+      setTimeout(function() { cityEl.style.borderColor = ''; }, 1200);
+      return;
+    }
+    render(city, state, country);
+  }
+
+  runBtn.addEventListener('click', run);
+  [cityEl, stateEl].forEach(function(el) {
+    el.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') run();
+    });
+  });
+})();
+</script>
+</body>
+</html>
